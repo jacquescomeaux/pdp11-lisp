@@ -1,0 +1,11 @@
+  MOV R1, -(SP)
+  BR 20$
+10$:
+  TSTB @#177564
+  BEQ 10$
+  MOVB R1, @#177566
+20$:
+  MOVB (R0)+, R1
+  BNE 10$
+  MOV (SP)+, R1
+  RTS PC
