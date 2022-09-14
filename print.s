@@ -3,7 +3,7 @@ print:
 004002 006000
 004004 032710 BIT #1, (R0)          ; test if sexp is cons or atom
 004006 000001
-004010 001003 BNE 6
+004010 001005 BNE 10
 004012 112725 MOVB #"(", (R5)+      ; if cons output open paren
 004014 000050
 004016 004737 JSR PC, #handle_cons
@@ -11,10 +11,12 @@ print:
 004022 000402 BR 4
 004024 004737 JSR PC, #handle_atom
 004026 004200
-004030 012725 MOV #"\n\0", (R5)+    ; move newline and null byte into print buffer
+004030 112725 MOVB #"\n", (R5)+     ; move newline into print buffer
 004032 000012
-004034 000137 JMP #print_buffer
-004036 004300
+004034 112725 MOVB #"\0", (R5)+     ; move null byte into print buffer
+004036 000000
+004040 000137 JMP #print_buffer
+004042 004300
 
 handle_cons:
 004100 016046 MOV 2(R0), -(SP)      ; push cdr onto stack
