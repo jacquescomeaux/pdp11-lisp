@@ -1,6 +1,6 @@
 print:
-004000 012705 MOV #6000, R5         ; store print buffer address in R5
-004002 006000
+004000 012705 MOV #7000, R5         ; store print buffer address in R5
+004002 007000
 004004 032710 BIT #1, (R0)          ; test if sexp is cons or atom
 004006 000001
 004010 001005 BNE 10
@@ -55,8 +55,8 @@ handle_atom:
 004214 000207 RTS PC          ;
 
 print_buffer:
-004300 012705 MOV #6000, R5       ; restore print buffer pointer
-004302 006000
+004300 012705 MOV #7000, R5       ; restore print buffer pointer
+004302 007000
 004304 000404 BR 12
 004306 105737 TSTB @#177564       ; test if console ready
 004310 177564
