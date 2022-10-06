@@ -11,12 +11,14 @@ print:
 004022 000402 BR 4
 004024 004737 JSR PC, #handle_atom
 004026 004200
-004030 112725 MOVB #"\n", (R5)+     ; move newline into print buffer
-004032 000012
-004034 112725 MOVB #"\0", (R5)+     ; move null byte into print buffer
-004036 000000
-004040 000137 JMP #print_buffer
-004042 004300
+004030 112725 MOVB #"\r", (R5)+     ; move carriage return into print buffer
+004032 000015
+004034 112725 MOVB #"\n", (R5)+     ; move line feed into print buffer
+004036 000012
+004040 112725 MOVB #"\0", (R5)+     ; move null byte into print buffer
+004042 000000
+004044 000137 JMP #print_buffer
+004046 004300
 
 handle_cons:
 004100 016046 MOV 2(R0), -(SP)      ; push cdr onto stack
@@ -57,7 +59,7 @@ handle_atom:
 print_buffer:
 004300 012705 MOV #7000, R5       ; restore print buffer pointer
 004302 007000
-004304 000404 BR 12
+004304 000405 BR 12
 004306 105737 TSTB @#177564       ; test if console ready
 004310 177564
 004312 001775 BEQ -6              ; loop while not ready
@@ -65,5 +67,4 @@ print_buffer:
 004316 177566
 004320 112501 MOVB (R5)+, R1      ; get next byte
 004322 001371 BNE -14             ; if not null continue
-004324 000137 JMP #read (002000)
-004326 002000
+004324 000207 RTS PC

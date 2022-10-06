@@ -321,7 +321,7 @@ cons:
 ; heap at 10000
 ; no garbage collection
 ; pretend heap is infinite
-004400 013702 MOV @#010000, R2     ; get free pointer
+004400 013702 MOV @#10000, R2     ; get free pointer
 004402 010000
 004404 010012 MOV R0, @R2         ; move arg1 to car of new cons cell
 004406 010162 MOV R1, 2(R2)       ; move arg2 to cdr of new cons cell
@@ -329,7 +329,7 @@ cons:
 004412 010200 MOV R2, R0          ; result <- new cons cell
 004414 062702 ADD 4, R2           ; advance free pointer
 004416 000004
-004420 010237 MOV R2, @#010000    ; store new free pointer
+004420 010237 MOV R2, @#10000    ; store new free pointer
 004422 010000
 004424 000207 RTS PC
 
