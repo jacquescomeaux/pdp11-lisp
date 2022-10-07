@@ -32,7 +32,7 @@ not_atom:
 003036 005100
 003040 004737 JSR PC, #eq           ; test eq(first, at"LABEL")
 003042 004600
-000044 001020 BNE not_label         ; branch if not label
+003044 001020 BNE not_label         ; branch if not label
 ; if is label
 003046 016202 MOV 2(R2), R2         ; rest <- cdr(hd)
 003050 000002
@@ -99,7 +99,7 @@ evlis: (symbols, args)
 003200 000002
 003202 016303 MOV 2(R3), R3               ; symbols <- cdr(symbols)
 003204 000002
-003206 000754 BR -40                      ; jump to evlis(symbols, args)
+003206 000754 BR evlis                    ; jump to evlis(symbols, args)
 done:
 003210 012601 MOV (SP)+, R1               ; restore rest
 ; R1 = rest
@@ -194,7 +194,7 @@ next:
 003470 004600
 003472 001026 BNE next              ; skip if not cond
 ; return evcon(tl)
-003474 010302 MOV R3, R2            ; c <- tl
+00474 010302 MOV R3, R2            ; c <- tl
 evcon:
 ; R1 = arg1 = at"T"
 ; R2 = c
@@ -277,8 +277,16 @@ next:
 003700 000207 RTS PC
 
 otherwise:
-; return eval(cons(assoc(hd), tl)))
-003702 000207 RTS PC
+; return eval(cons(assoc(hd), tl))
+003702 010200 MOV R2, R0            ; arg <- hd
+003704 004737 JSR PC, #assoc        ; arg1 <- assoc(hd)
+003706 004500
+003710 010301 MOV R3, R1            ; arg2 <- tl
+003712 004737 JSR PC, #cons         ; arg <- cons(assoc(hd), tl)
+003714 004400
+003716 004737 JSR PC, #eval         ; result <- eval(arg)
+003720 003000
+003722 000207 RTS PC
 
 ; This one touches R0, R1
 eq:
@@ -344,8 +352,8 @@ assoc:
 ; R2 = symbol
 ; R4 = symbol table pointer
 loop:
-004504 020437 CMP R4, #10000  ; beginning of symbol table
-004506 010000
+004504 020427 CMP R4, #6000  ; beginning of symbol table
+004506 006000
 004510 101411 BLOS bad        ; symbol not found
 ; otherwise check next row
 004512 005744 TST -(R4)       ; skip column 1
