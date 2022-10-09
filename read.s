@@ -1,7 +1,7 @@
 read:
-002000 012705 MOV #7000, R5     ; move read buffer address into R5
+002000 012704 MOV #7000, R4     ; move read buffer address into R4
 002002 007000
-002004 105025 CLRB (R5)+        ; move null byte into buffer
+002004 105024 CLRB (R4)+        ; move null byte into buffer
 get:
 002006 032737 BIT #200, @#177560
 002010 000200
@@ -28,7 +28,7 @@ get:
 002062 000132
 002064 101010 BHI bad
 good:
-002066 110125 MOVB R1, (R5)+    ; move good char into buffer
+002066 110124 MOVB R1, (R4)+    ; move good char into buffer
 echo:
 ; echo good char
 002070 032737 BIT #200, @#177654
@@ -62,7 +62,7 @@ line:
 002146 002200
 
 
-; R4 = sexps
+; R3 = sexps
 parse_sexp:
 002200 004737 JSR PC, #get_next       ; get a character
 002202 002400
@@ -72,7 +72,7 @@ parse_sexp:
 ; otherwise (if list)
 ; get the list
 if_list:
-002212 012704 MOV "NIL", R4           ; sexps <- empty list
+002212 012703 MOV "NIL", R3           ; sexps <- empty list
 002214 005000
 loop:
 002216 004737 JSR PC, #get_next
@@ -81,23 +81,23 @@ loop:
 002224 000050
 002226 001411 BEQ done                ; if "(" return the accumulated list
 ; if anything else:
-002230 110025 MOVB R0, (R5)+          ; put back the char
-002232 010446 MOV R4, -(SP)           ; push sexps
+002230 110024 MOVB R0, (R4)+          ; put back the char
+002232 010346 MOV R3, -(SP)           ; push sexps
 002234 004737 JSR PC, #parse_sexp     ; arg1 <- parse sexp
 002236 002200
 002240 012601 MOV (SP)+, R1           ; arg2 <- pop accum
 002142 004737 JSR PC, #cons           ; cons result onto accum
 002244 004400
-002246 010004 MOV R0, R4              ; sexps <- result
+002246 010003 MOV R0, R3              ; sexps <- result
 002250 000762 BR loop                 ; continue recognizing list
 done:
-002252 010400 MOV R4, R0              ; result <- sexps
+002252 010300 MOV R3, R0              ; result <- sexps
 002254 000207 RTS PC
 if_atom:
 002256 105046 CLRB -(SP)    ; push null byte to stack
 loop:
 002260 110046 MOVB R0, -(SP)      ; push character to stack
-002262 114500 MOVB -(R5), R0      ; get another character
+002262 114400 MOVB -(R4), R0      ; get another character
 002264 120027 CMPB R0, "A"        ;
 002266 000101
 002270 103404 BLO done            ; done if lower than A
@@ -106,7 +106,7 @@ loop:
 002276 101001 BHI done            ; done if higher than Z
 002300 000767 BR loop             ; continue getting characters
 done:
-002302 110025 MOVB R0, (R5)+      ; put the non-letter back
+002302 110024 MOVB R0, (R4)+      ; put the non-letter back
 002304 013702 MOV @#10000, R2     ; get free pointer
 002306 010000
 002310 010200 MOV R2, R0          ; result <- address of new atom
@@ -127,7 +127,7 @@ loop:
 
 get_next:
 loop:
-002400 114500 MOVB -(R5), R0
+002400 114400 MOVB -(R4), R0
 002402 001404 BEQ bad             ; if null byte, no more input, very bad
 002404 120027 CMPB R0, " "        ; check if space
 002406 000040
