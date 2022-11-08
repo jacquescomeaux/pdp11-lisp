@@ -1,66 +1,70 @@
 read:
-002000 012704 MOV #7000, R4     ; move read buffer address into R4
+002000 012704 MOV #7000, R4       ; move read buffer address into R4
 002002 007000
-002004 105024 CLRB (R4)+        ; move null byte into buffer
+002004 105024 CLRB (R4)+          ; move null byte into buffer
 get:
 002006 032737 BIT #200, @#177560
 002010 000200
 002012 177560
-002014 001774 BEQ get           ; loop until char ready
-002016 113701 MOVB @#177562, R1
+002014 001774 BEQ get             ; loop until char ready
+002016 113701 MOVB @#177562, R1   ; get the char
 002020 177562
-002022 120127 CMPB R1, "\r"     ; done if enter was pressed
-002024 000015
-002026 001430 BEQ done
-002030 120127 CMPB R1, " "      ; good if space
-002032 000040
-002034 001414 BEQ good
-002036 120127 CMPB R1, "("      ; good if left paren
-002040 000050
-002042 001411 BEQ good
-002044 120127 CMPB R1, ")"      ; good if right paren
-002046 000051
-002050 001406 BEQ good
-002052 120127 CMPB R1, "A"      ; bad if lower than A
-002054 000101
-002056 103413 BLO bad
-002060 120127 CMPB R1, "Z"      ; bad if higher than Z
-002062 000132
-002064 101010 BHI bad
+002022 120127 CMPB R1, "DEL"      ; delete char if backspace was pressed
+002024 000177
+002026 001004 BNE not_backspace
+002030 005304 DEC R4              ; decrement buffer pointer
+002032 004737 JSR PC, @backspace  ; send backspace char
+002034 002144
+002036 000763 BR get              ; keep getting chars
+not_backspace:
+002040 120127 CMPB R1, "\r"       ; done if enter was pressed
+002042 000015
+002044 001424 BEQ done
+002046 120127 CMPB R1, " "        ; good if space
+002050 000040
+002052 001414 BEQ good
+002054 120127 CMPB R1, "("        ; good if left paren
+002056 000050
+002060 001411 BEQ good
+002062 120127 CMPB R1, ")"        ; good if right paren
+002064 000051
+002066 001406 BEQ good
+002070 120127 CMPB R1, "A"        ; bad if lower than A
+002072 000101
+002074 103407 BLO bad
+002076 120127 CMPB R1, "Z"        ; bad if higher than Z
+002100 000132
+002102 101004 BHI bad
 good:
-002066 110124 MOVB R1, (R4)+    ; move good char into buffer
-echo:
-; echo good char
-002070 032737 BIT #200, @#177654
-002072 000200
-002074 177564
-002076 001774 BEQ echo
-002100 110137 MOVB R1, @#177566
-002102 177566
-002104 000740 BR get            ; keep getting chars
+002104 110124 MOVB R1, (R4)+      ; move good char into buffer
+002106 004737 JSR PC, @print_char ; echo good char
+002110 002150
+002112 000735 BR get              ; keep getting chars
 bad:
-002106 000737 BR get            ; ignore bad chars
+002114 000734 BR get              ; ignore bad chars
 done:
-; send carriage return
-002110 032737 BIT #200, @#177654
-002112 000200
-002114 177564
-002116 001774 BEQ done
-002120 112737 MOV "\r", @#177566
-002122 000015
-002124 177566
-; send line feed
-line:
-002126 032737 BIT #200, @#177654
-002130 000200
-002132 177564
-002134 001774 BEQ line
-002136 112737 MOV "\n", @#177566
-002140 000012
-002142 177566
-002144 000137 JMP #parse_sexp
-002146 002200
+002116 112701 MOVB "\r", R1       ; send carriage return
+002120 000015
+002122 004737 JSR PC, @print_char
+002124 002150
+002126 112701 MOVB "\n", R1       ; send line feed
+002130 000012
+002132 004737 JSR PC, @print_char
+002134 002150
+002136 000137 JMP @parse_sexp
+002140 002200
 
+backspace:
+002144 112701 MOVB "\b", R1
+002146 000010
+print_char:
+002150 032737 BIT #200, @#177654
+002152 000200
+002154 177564
+002156 001774 BEQ print_char
+002160 110137 MOVB R1, @#177566
+002162 177566
+002164 000207 RTS PC
 
 ; R3 = sexps
 parse_sexp:
