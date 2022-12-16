@@ -40,10 +40,9 @@ not_atom:
 003054 000002
 ; R2 = rest
 ; R3 = rest'
-; push entry l[second, hd] onto symbol table a
-; a <- cons(l[second, hd], a)
+; push entry l[second, third] onto symbol table a
 003056 011225 MOV @R2, (R5)+        ; push second (=car(rest)) onto symbol table column 0
-003060 011425 MOV @R4, (R5)+        ; push hd onto symbol table column 1
+003060 011325 MOV @R3, (R5)+        ; push third (=car(rest')) onto symbol table column 1
 ; evaluate cons(third, tl) in extended environment
 ; R0 <- cons(third, tl)
 003062 011300 MOV @R3, R0           ; arg1 <- third (=car(rest'))
@@ -64,7 +63,7 @@ not_label:
 003112 005110
 003114 004737 JSR PC, #eq           ; test eq(first, at"LAMBDA")
 003116 004600
-003120 001043 BNE error             ; branch if not lambda
+003120 001043 BNE not_lambda        ; branch if not lambda
 ; if is lambda
 ; push onto a               ; a <- append(pair(second, evlis(tl)), a)
 003122 010546 MOV R5, -(SP)               ; push old symbol table pointer to stack
@@ -111,8 +110,31 @@ done:
 ; pop off argument entries
 003224 012605 MOV (SP)+, R5               ; restore symbol table pointer
 003226 000207 RTS PC
-error:
-003230 000777 BR -2                       ; infinite loop
+
+not_lambda:
+; R2 = hd
+003230 011200 MOV @R2, R0           ; arg1 <- car(hd) = first
+003232 012701 MOV "DEFINE", R1      ; arg2 <- at"DEFINE"
+003234 005122
+003236 004737 JSR PC, #eq           ; test eq(first, at"DEFINE")
+003240 004600
+003242 001377 BNE error             ; infinite loop if not define
+; if is define
+; push entry l[cp(second), cp(third)] onto symbol table
+003244 016203 MOV 2(R2), R3         ; rest <- cdr(hd)
+003246 000002
+003250 011300 MOV @R3, R0           ; arg1 <- second (=car(rest))
+003252 004737 JSR PC, @copy         ; copy second to big heap
+003254 005400
+003256 010025 MOV R0, (R5)+         ; push cp(second) onto symbol table column 0
+003260 017300 MOV @2(R3), R0        ; arg1 <- third (=car(cdr(rest)))
+003262 000002
+003264 004737 JSR PC, @copy         ; copy third to big heap
+003266 005400
+003270 010025 MOV R0, (R5)+         ; push cp(third) onto symbol table column 1
+003272 012700 MOV "NIL", R0         ; result <- at"NIL"
+003274 005000
+003276 000207 RTS PC                ; return result
 
 head_is_atom:
 ; R2 = hd
